@@ -14,6 +14,7 @@ build:
     entrypoint: [""] # 중요한 설정, shell 없이 executor 직접 실행,,
   script:
     # Kaniko Docker auth
+    - echo "49.50.136.146 gitlab.internal" >> /etc/hosts
     - mkdir -p $DOCKER_CONFIG
     - echo "{\"auths\":{\"harbor.internal\":{\"username\":\"$HARBOR_USER\",\"password\":\"$HARBOR_PASSWORD\"}}}" > $DOCKER_CONFIG/config.json
 
