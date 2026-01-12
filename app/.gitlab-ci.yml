@@ -1,23 +1,30 @@
+# app/.gitlab-ci.yml
 stages:
   - build
 
 variables:
   IMAGE_NAME: "harbor.internal/library/cicd-app"
   IMAGE_TAG: "$CI_COMMIT_SHORT_SHA"
+  DOCKER_CONFIG: "/kaniko/.docker"
 
 build:
   stage: build
   image:
     name: gcr.io/kaniko-project/executor:latest
-    entrypoint: [""]
+    entrypoint: [""] # 중요한 설정, shell 없이 executor 직접 실행
   script:
-    # Kaniko 실행
+    # Kaniko Docker auth
+    - mkdir -p $DOCKER_CONFIG
+    - echo "{\"auths\":{\"harbor.internal\":{\"username\":\"$HARBOR_USER\",\"password\":\"$HARBOR_PASSWORD\"}}}" > $DOCKER_CONFIG/config.json
+
+    # Kaniko로 Docker 이미지 빌드 + push
     - /kaniko/executor \
         --context $CI_PROJECT_DIR \
         --dockerfile $CI_PROJECT_DIR/Dockerfile \
         --destination $IMAGE_NAME:$IMAGE_TAG \
         --insecure \
         --skip-tls-verify
+
   only:
     - main
 
