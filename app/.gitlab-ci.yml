@@ -10,8 +10,8 @@ variables:
 build:
   stage: build
   image:
-    name: harbor.internal/library/kaniko-executor:v1.12.0
-    entrypoint: ["/kaniko/executor"] # 중요한 설정, shell 없이 executor 직접 실행
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""] # 중요한 설정, shell 없이 executor 직접 실행
   script:
     # Kaniko Docker auth
     - mkdir -p $DOCKER_CONFIG
