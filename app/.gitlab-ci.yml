@@ -12,11 +12,11 @@ build:
     name: gcr.io/kaniko-project/executor:latest
     entrypoint: [""]
   script:
-    # Harbor 로그인 정보
+    # Kaniko Docker auth (Harbor 로그인)
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"harbor.internal\":{\"username\":\"$HARBOR_USER\",\"password\":\"$HARBOR_PASSWORD\"}}}" > /kaniko/.docker/config.json
 
-    # 이미지 빌드 및 push
+    # 이미지 빌드 + Push
     - /kaniko/executor \
         --context $CI_PROJECT_DIR \
         --dockerfile $CI_PROJECT_DIR/Dockerfile \

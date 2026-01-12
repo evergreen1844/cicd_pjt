@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: cicd-app
   namespace: default
+  labels:
+    app: cicd-app
 spec:
   replicas: 1
   selector:
