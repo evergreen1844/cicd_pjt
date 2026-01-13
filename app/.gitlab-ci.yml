@@ -2,35 +2,38 @@ stages:
   - build
 
 variables:
-  IMAGE_NAME: "harbor.internal/library/cicd-app"
-  IMAGE_TAG: "$CI_COMMIT_SHORT_SHA"
-  DOCKER_CONFIG: "/kaniko/.docker"
+  IMAGE_NAME: harbor.internal/library/cicd-app
+  IMAGE_TAG: $CI_COMMIT_SHORT_SHA
+  DOCKER_CONFIG: /kaniko/.docker
 
-build:
+build-image:
   stage: build
-  image:
-    name: gcr.io/kaniko-project/executor:debug
-    # entrypoint 삭제 ← 중요
+  image: gcr.io/kaniko-project/executor:v1.23.2
   script:
-    # GitLab DNS 강제 매핑 (테스트용)
-    - echo "49.50.136.146 gitlab.internal" >> /etc/hosts
-
-    # Kaniko Docker auth
+    # Harbor auth
     - mkdir -p "$DOCKER_CONFIG"
     - |
-      echo "{\"auths\":{\"harbor.internal\":{
-        \"username\":\"$HARBOR_USER\",
-        \"password\":\"$HARBOR_PASSWORD\"
-      }}}" > "$DOCKER_CONFIG/config.json"
+      cat > "$DOCKER_CONFIG/config.json" <<EOF
+      {
+        "auths": {
+          "harbor.internal": {
+            "username": "$HARBOR_USER",
+            "password": "$HARBOR_PASSWORD"
+          }
+        }
+      }
+      EOF
 
-    # Kaniko build & push
+    # Kaniko build
     - |
       /kaniko/executor \
-        --context "$CI_PROJECT_DIR" \
-        --dockerfile "$CI_PROJECT_DIR/Dockerfile" \
+        --context "$CI_PROJECT_DIR/app" \
+        --dockerfile Dockerfile \
         --destination "$IMAGE_NAME:$IMAGE_TAG" \
-        --skip-tls-verify
+        --skip-tls-verify \
+        --skip-tls-verify-pull \
+        --cache=true
 
-  only:
-    - main
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
 
