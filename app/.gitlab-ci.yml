@@ -31,10 +31,9 @@ build-image:
         --context "$CI_PROJECT_DIR/app" \
         --dockerfile Dockerfile \
         --destination "$IMAGE_NAME:$IMAGE_TAG" \
-        --skip-tls-verify \
-        --skip-tls-verify-pull \
-        --cache=true
-
+        --insecure \
+        --insecure-pull \
+        --skip-push-permission-check
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
 
