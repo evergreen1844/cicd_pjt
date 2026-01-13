@@ -29,7 +29,6 @@ build:
         --context "$CI_PROJECT_DIR" \
         --dockerfile "$CI_PROJECT_DIR/Dockerfile" \
         --destination "$IMAGE_NAME:$IMAGE_TAG" \
-        --insecure \
         --skip-tls-verify
 
   only:
