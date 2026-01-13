@@ -8,9 +8,10 @@ variables:
 
 build-image:
   stage: build
-  image: gcr.io/kaniko-project/executor:v1.23.2
+  image:
+    name: gcr.io/kaniko-project/executor:v1.23.2
   script:
-    # Harbor auth
+    # Harbor 인증
     - mkdir -p "$DOCKER_CONFIG"
     - |
       cat > "$DOCKER_CONFIG/config.json" <<EOF
@@ -24,7 +25,7 @@ build-image:
       }
       EOF
 
-    # Kaniko build
+    # Kaniko build & push
     - |
       /kaniko/executor \
         --context "$CI_PROJECT_DIR/app" \
@@ -35,5 +36,5 @@ build-image:
         --cache=true
 
   rules:
-    - if: $CI_COMMIT_BRANCH == "main"
+    - if: '$CI_COMMIT_BRANCH == "main"'
 
