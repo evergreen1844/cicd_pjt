@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cicd-app
-  namespace: default
+  namespace: etc
   labels:
     app: cicd-app
 spec:
@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: cicd-app
-        image: harbor.internal/library/cicd-app:latest
+        image: harbor.internal/library/cicd-app:d07153c0
         ports:
         - containerPort: 8080
 
