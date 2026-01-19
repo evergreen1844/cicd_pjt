@@ -29,11 +29,14 @@ build-image:
     - |
       /kaniko/executor \
         --context "$CI_PROJECT_DIR/app" \
-        --dockerfile Dockerfile \
+        --dockerfile "$CI_PROJECT_DIR/app/Dockerfile" \
         --destination "$IMAGE_NAME:$IMAGE_TAG" \
         --insecure \
         --insecure-pull \
         --skip-push-permission-check
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
-
+      changes:
+        - app/**/*
+        - Dockerfile
+        - .gitlab-ci.yml

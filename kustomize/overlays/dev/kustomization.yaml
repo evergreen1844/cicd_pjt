@@ -1,0 +1,9 @@
+namespace: dev
+
+resources:
+- ../../base
+
+images:
+- name: harbor.internal/library/cicd-app
+  newTag: b2bc9b42
+
