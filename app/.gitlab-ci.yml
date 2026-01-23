@@ -12,10 +12,11 @@ build-jar:
   stage: build
   image: maven:3.9.6-eclipse-temurin-17
   script:
+    - cd app
     - mvn clean package -DskipTests
   artifacts:
     paths:
-      - target/*.jar
+      - app/target/*.jar
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       changes:
