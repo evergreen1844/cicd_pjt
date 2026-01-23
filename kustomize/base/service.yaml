@@ -3,9 +3,11 @@ kind: Service
 metadata:
   name: cicd-app
 spec:
+  type: NodePort
   selector:
     app: cicd-app
   ports:
   - port: 80
     targetPort: 8080
+    NodePort: 30080
 
