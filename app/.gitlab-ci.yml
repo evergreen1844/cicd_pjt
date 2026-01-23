@@ -11,6 +11,8 @@ build-image:
   image:
     name: gcr.io/kaniko-project/executor:debug
   script:
+    # 1. Maven build
+    - mvn clean package -DskipTests
     # Harbor 인증
     - mkdir -p "$DOCKER_CONFIG"
     - |
