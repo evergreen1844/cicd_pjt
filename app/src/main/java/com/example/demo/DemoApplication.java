@@ -11,7 +11,7 @@ public class DemoApplication {
 
     @GetMapping("/")
     public String hello() {
-        return "CI/CD Test_20260126";
+        return "CI/CD Test_20260126_17시";
     }
 
     public static void main(String[] args) {
