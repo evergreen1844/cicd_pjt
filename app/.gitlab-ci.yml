@@ -71,7 +71,7 @@ update-kustomize-dev:
     - 'sed -i "s/newTag:.*/newTag: ${IMAGE_TAG}/" kustomize/overlays/dev/kustomization.yaml'
     - 'git add kustomize/overlays/dev/kustomization.yaml'
     - 'git commit -m "deploy(dev): ${IMAGE_TAG}" || echo "no change"'
-    - 'git push https://root:${GITLAB_TOKEN}@gitlab.internal/root/pjt-cicd.git HEAD:main'
+    - 'git push https://oauth2:${GITLAB_TOKEN}@gitlab.internal/root/pjt-cicd.git HEAD:main'
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       
