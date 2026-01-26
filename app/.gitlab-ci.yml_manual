@@ -57,25 +57,3 @@ build-image:
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
 
-update-kustomize-dev:
-  stage: deploy
-  image: alpine:3.19
-  needs:
-    - build-image
-  before_script:
-    - apk add --no-cache git sed
-    - git config --global user.email "ci@gitlab.internal"
-    - git config --global user.name "gitlab-ci"
-  script:
-    # dev overlay 이미지 태그 자동 변경
-    - sed -i "s/newTag:.*/newTag: ${IMAGE_TAG}/" kustomize/overlays/dev/kustomization.yaml
-
-    # 변경 내용 커밋 & 푸시
-    - git add kustomize/overlays/dev/kustomization.yaml
-    - git commit -m "deploy(dev): ${IMAGE_TAG}"
-    - git push https://root:${GITLAB_TOKEN}@gitlab.internal/root/pjt-cicd.git HEAD:main
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      changes:
-        - app/**/*      
-      
