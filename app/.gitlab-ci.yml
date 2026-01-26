@@ -60,11 +60,10 @@ build-image:
 
 update-kustomize-dev:
   stage: deploy
-  image: alpine:3.19
+  image: alpine:git
   needs:
     - build-image
   before_script:
-    - apk add --no-cache git sed
     - git config --global user.email "ci@gitlab.internal"
     - git config --global user.name "gitlab-ci"
   script:
