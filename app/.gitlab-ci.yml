@@ -1,6 +1,7 @@
 stages:
   - build
   - image
+  - deploy
 
 variables:
   IMAGE_NAME: harbor.internal/library/cicd-app
@@ -72,10 +73,8 @@ update-kustomize-dev:
 
     # 변경 내용 커밋 & 푸시
     - git add kustomize/overlays/dev/kustomization.yaml
-    - git commit -m "deploy(dev): ${IMAGE_TAG}"
+    - git commit -m "deploy(dev): ${IMAGE_TAG}" || echo "no change"
     - git push https://root:${GITLAB_TOKEN}@gitlab.internal/root/pjt-cicd.git HEAD:main
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
-      changes:
-        - app/**/*      
       
