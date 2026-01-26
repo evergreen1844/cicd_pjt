@@ -60,7 +60,7 @@ build-image:
 
 update-kustomize-dev:
   stage: deploy
-  image: alpine:git
+  image: alpine/git:latest
   needs:
     - build-image
   before_script:
