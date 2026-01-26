@@ -64,6 +64,7 @@ update-kustomize-dev:
   needs:
     - build-image
   before_script:
+    - git config --global http.sslVerify false
     - git config --global user.email "ci@gitlab.internal"
     - git config --global user.name "gitlab-ci"
   script:
