@@ -1,6 +1,7 @@
 stages:
   - build
   - image
+  - deploy
 
 variables:
   IMAGE_NAME: harbor.internal/library/cicd-app
@@ -57,3 +58,20 @@ build-image:
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
 
+update-kustomize-dev:
+  stage: deploy
+  image: alpine/git:latest
+  needs:
+    - build-image
+  before_script:
+    - git config --global http.sslVerify false
+    - git config --global user.email "ci@gitlab.internal"
+    - git config --global user.name "gitlab-ci"
+  script:
+    - 'sed -i "s/newTag:.*/newTag: ${IMAGE_TAG}/" kustomize/overlays/dev/kustomization.yaml'
+    - 'git add kustomize/overlays/dev/kustomization.yaml'
+    - 'git commit -m "deploy(dev): ${IMAGE_TAG}" || echo "no change"'
+    - 'git push https://oauth2:${GITLAB_TOKEN}@gitlab.internal/root/pjt-cicd.git HEAD:main'
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      
