@@ -4,6 +4,14 @@ metadata:
   name: cicd-app
 spec:
   replicas: 1
+
+  # rollingupdate Test
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+
   selector:
     matchLabels:
       app: cicd-app
@@ -17,4 +25,6 @@ spec:
         image: harbor.internal/library/cicd-app
         ports:
         - containerPort: 8080
-
+        envFrom:
+          - secretRef:
+              name: postgres-secret
