@@ -6,6 +6,7 @@ spec:
   replicas: 1
 
   # rollingupdate Test
+  revisionHistoryLimit: 5
   strategy:
     type: RollingUpdate
     rollingUpdate:
