@@ -71,7 +71,8 @@ update-kustomize-dev:
     - 'sed -i "s/newTag:.*/newTag: ${IMAGE_TAG}/" kustomize/overlays/dev/kustomization.yaml'
     - 'git add kustomize/overlays/dev/kustomization.yaml'
     - 'git commit -m "deploy(dev): ${IMAGE_TAG} [skip ci]" || echo "no change"'
-    - 'git push https://oauth2:${GITLAB_TOKEN}@gitlab.internal/root/pjt-cicd.git HEAD:main'
+    - 'git push https://oauth2:${GITLAB_TOKEN}@gitlab.internal/root/pjt-cicd.git HEAD:dev'
+    - 'kubectl apply -k kustomize/overlays/dev'
   rules:
     - if: '$CI_COMMIT_BRANCH == "dev"'
       
@@ -89,5 +90,6 @@ update-kustomize-prd:
     - 'git add kustomize/overlays/prd/kustomization.yaml'
     - 'git commit -m "deploy(prd): ${IMAGE_TAG} [skip ci]" || echo "no change"'
     - 'git push https://oauth2:${GITLAB_TOKEN}@gitlab.internal/root/pjt-cicd.git HEAD:main'
+    - 'kubectl apply -k kustomize/overlays/prd'    
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
