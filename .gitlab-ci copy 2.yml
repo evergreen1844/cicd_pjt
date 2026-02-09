@@ -14,15 +14,10 @@ build-jar:
   image: maven:3.9.6-eclipse-temurin-17
   script:
     - cd app
-    - rm -rf targe    
-    - mvn clean package -DskipTests -U
-    - ls -la target/classes/com/example/demo/          
-    - jar tf target/demo-0.0.1.jar | grep Controller       
+    - mvn clean package -DskipTests
   artifacts:
     paths:
       - app/target/*.jar
-    expire_in: 1 hour        
-  cache: {} 
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"'
       changes:
