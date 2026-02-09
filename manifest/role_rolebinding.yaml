@@ -1,0 +1,26 @@
+# dev-namespace-admin.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: dev
+  name: gitlab-runner-role
+rules:
+- apiGroups: ["", "apps", "networking.k8s.io"]
+  resources: ["pods", "services", "deployments", "ingresses", "configmaps", "secrets"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  namespace: dev
+  name: gitlab-runner-rolebinding
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: gitlab
+roleRef:
+  kind: Role
+  name: gitlab-runner-role
+  apiGroup: rbac.authorization.k8s.io
+
