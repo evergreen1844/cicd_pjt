@@ -32,7 +32,7 @@ build-image:
   dependencies:
     - build-jar
   script:
-    # Harbor 인증
+    # Harbor 인증 
     - mkdir -p "$DOCKER_CONFIG"
     - |
       cat > "$DOCKER_CONFIG/config.json" <<EOF
