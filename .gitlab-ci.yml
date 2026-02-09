@@ -25,7 +25,9 @@ build-jar:
   cache: {} 
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"'
-
+      changes:
+        - app/**/*
+        - app/pom.xml
 
 # 2. 이미지 빌드 & 푸시 단계
 build-image:
