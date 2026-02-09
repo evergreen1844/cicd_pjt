@@ -26,7 +26,7 @@ public class SecurityConfig {
                 //.requestMatchers("/login").permitAll()
 		.requestMatchers("/login", "/register").permitAll()
 
-                // 그 외는 인증 필요
+                // 그 외는 인증 필요?
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
