@@ -3,10 +3,11 @@ kind: Service
 metadata:
   name: cicd-app
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: cicd-app
   ports:
   - port: 80
     targetPort: 8080
+    nodePort: 30080
 
