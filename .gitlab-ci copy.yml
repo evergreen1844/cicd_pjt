@@ -19,7 +19,7 @@ build-jar:
     paths:
       - app/target/*.jar
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
       changes:
         - app/**/*
         - app/pom.xml
@@ -56,7 +56,7 @@ build-image:
         --insecure-pull \
         --skip-push-permission-check
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
 
 update-kustomize-dev:
   stage: deploy
@@ -73,21 +73,5 @@ update-kustomize-dev:
     - 'git commit -m "deploy(dev): ${IMAGE_TAG} [skip ci]" || echo "no change"'
     - 'git push https://oauth2:${GITLAB_TOKEN}@gitlab.internal/root/pjt-cicd.git HEAD:main'
   rules:
-    - if: '$CI_COMMIT_BRANCH == "dev"'
-      
-update-kustomize-prd:
-  stage: deploy
-  image: alpine/git:latest
-  needs:
-    - build-image
-  before_script:
-    - git config --global http.sslVerify false
-    - git config --global user.email "ci@gitlab.internal"
-    - git config --global user.name "gitlab-ci"
-  script:
-    - 'sed -i "s/newTag:.*/newTag: ${IMAGE_TAG}/" kustomize/overlays/prd/kustomization.yaml'
-    - 'git add kustomize/overlays/prd/kustomization.yaml'
-    - 'git commit -m "deploy(prd): ${IMAGE_TAG} [skip ci]" || echo "no change"'
-    - 'git push https://oauth2:${GITLAB_TOKEN}@gitlab.internal/root/pjt-cicd.git HEAD:main'
-  rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
+      

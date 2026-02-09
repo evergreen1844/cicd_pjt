@@ -1,0 +1,9 @@
+namespace: prd
+
+resources:
+- ../../base
+
+images:
+- name: harbor.internal/library/cicd-app
+  newTag: a71c4323
+
