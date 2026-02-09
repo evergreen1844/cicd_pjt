@@ -2,9 +2,18 @@ body {
     font-family: Arial, sans-serif;
     background: #f5f6f8;
     height: 100vh;
+
+    /* ⭐ 세로 배치 */
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+}
+
+.page-title {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 30px;
 }
 
 .login-container {
@@ -50,14 +59,4 @@ body {
     border-radius: 4px;
     font-size: 14px;
 }
-
-<style>
-  .page-title {
-    text-align: center;
-    font-size: 28px;
-    font-weight: bold;
-    margin-top: 80px;
-    margin-bottom: 30px;
-  }
-</style>
 
