@@ -23,7 +23,8 @@ public class SecurityConfig {
                 ).permitAll()
 
                 // 로그인 페이지 허용
-                .requestMatchers("/login").permitAll()
+                //.requestMatchers("/login").permitAll()
+		.requestMatchers("/login", "/register").permitAll()
 
                 // 그 외는 인증 필요
                 .anyRequest().authenticated()
