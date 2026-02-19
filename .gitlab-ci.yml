@@ -56,7 +56,6 @@ build-image:
         --insecure \
         --insecure-pull \
         --skip-push-permission-check \
-        --no-cache
   only:
     - dev
     - main
