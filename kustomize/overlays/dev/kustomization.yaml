@@ -2,6 +2,7 @@ namespace: dev
 
 resources:
 - ../../base
+- ingress.yaml
 
 images:
 - name: harbor.internal/library/cicd-app
