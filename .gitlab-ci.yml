@@ -25,7 +25,7 @@ build-jar:
     - if: '$CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"'
 
 ############################
-# 2️⃣ Docker Image Build & Push (Kaniko)
+# 2️⃣ Docker Image Build & Push
 ############################
 build-image:
   stage: image
@@ -59,7 +59,7 @@ build-image:
     - if: '$CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"'
 
 ############################
-# 3️⃣ DEV Deploy
+# 3️⃣ DEV Deploy (context 사용 안함)
 ############################
 deploy-dev:
   stage: deploy
@@ -67,14 +67,13 @@ deploy-dev:
   needs:
     - build-image
   script:
-    - kubectl config use-context "$KUBE_CONTEXT_DEV"
     - kubectl set image deployment/cicd-app cicd-app=$IMAGE_NAME:$IMAGE_TAG -n dev
     - kubectl rollout status deployment/cicd-app -n dev
   rules:
     - if: '$CI_COMMIT_BRANCH == "dev"'
 
 ############################
-# 4️⃣ PRD Deploy
+# 4️⃣ PRD Deploy (context 사용 안함)
 ############################
 deploy-prd:
   stage: deploy
@@ -82,7 +81,6 @@ deploy-prd:
   needs:
     - build-image
   script:
-    - kubectl config use-context "$KUBE_CONTEXT_PRD"
     - kubectl set image deployment/cicd-app cicd-app=$IMAGE_NAME:$IMAGE_TAG -n prd
     - kubectl rollout status deployment/cicd-app -n prd
   rules:
