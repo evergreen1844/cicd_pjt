@@ -77,6 +77,6 @@ update-manifest-dev:
       kustomize/overlays/dev/kustomization.yaml
     - git add kustomize/overlays/dev/kustomization.yaml
     - git commit -m "Update image tag to $IMAGE_TAG"
-    - "git push https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.internal/root/pjt-cicd.git HEAD:dev"
+    - git push https://oauth2:${GITLAB_TOKEN}@gitlab.internal/root/pjt-cicd.git HEAD:dev
   only:
     - dev
