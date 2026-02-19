@@ -6,5 +6,5 @@ resources:
 
 images:
 - name: harbor.internal/library/cicd-app
-  newTag: 8c67f698
+  newTag: b96cd265
 
