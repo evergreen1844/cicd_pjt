@@ -8,28 +8,25 @@ variables:
   IMAGE_TAG: $CI_COMMIT_SHORT_SHA
   DOCKER_CONFIG: /kaniko/.docker
 
-# 1. Java 빌드 단계
+############################
+# 1️⃣ Java Build
+############################
 build-jar:
   stage: build
   image: maven:3.9.6-eclipse-temurin-17
   script:
     - cd app
-    - rm -rf targe    
-    - mvn clean package -DskipTests -U
-    - ls -la target/classes/com/example/demo/          
-    - jar tf target/demo-0.0.1.jar | grep Controller       
+    - mvn clean package -DskipTests
   artifacts:
     paths:
       - app/target/*.jar
-    expire_in: 1 hour        
-  cache: {} 
+    expire_in: 1 hour
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"'
-      changes:
-        - app/**/*
-        - app/pom.xml
+    - if: '$CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"'
 
-# 2. 이미지 빌드 & 푸시 단계
+############################
+# 2️⃣ Docker Image Build & Push (Kaniko)
+############################
 build-image:
   stage: image
   image:
@@ -37,7 +34,6 @@ build-image:
   dependencies:
     - build-jar
   script:
-    # Harbor 인증 
     - mkdir -p "$DOCKER_CONFIG"
     - |
       cat > "$DOCKER_CONFIG/config.json" <<EOF
@@ -51,7 +47,6 @@ build-image:
       }
       EOF
 
-    # Kaniko build & push
     - |
       /kaniko/executor \
         --context "$CI_PROJECT_DIR/app" \
@@ -61,48 +56,35 @@ build-image:
         --insecure-pull \
         --skip-push-permission-check
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"'
+    - if: '$CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"'
 
-update-kustomize-dev:
+############################
+# 3️⃣ DEV Deploy
+############################
+deploy-dev:
   stage: deploy
-  image: alpine/git:latest
+  image: bitnami/kubectl:latest
   needs:
     - build-image
-  before_script:
-    - apk add --no-cache curl bash
-    - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-    - chmod +x kubectl
-    - mv kubectl /usr/local/bin/
-    - git config --global http.sslVerify false
-    - git config --global user.email "ci@gitlab.internal"
-    - git config --global user.name "gitlab-ci"
   script:
-    - 'sed -i "s/newTag:.*/newTag: ${IMAGE_TAG}/" kustomize/overlays/dev/kustomization.yaml'
-    - 'git add kustomize/overlays/dev/kustomization.yaml'
-    - 'git commit -m "deploy(dev): ${IMAGE_TAG} [skip ci]" || echo "no change"'
-    - 'git push https://oauth2:${GITLAB_TOKEN}@gitlab.internal/root/pjt-cicd.git HEAD:dev'
-    - 'kubectl apply -k kustomize/overlays/dev'
+    - kubectl config use-context "$KUBE_CONTEXT_DEV"
+    - kubectl set image deployment/cicd-app cicd-app=$IMAGE_NAME:$IMAGE_TAG -n dev
+    - kubectl rollout status deployment/cicd-app -n dev
   rules:
     - if: '$CI_COMMIT_BRANCH == "dev"'
-      
-update-kustomize-prd:
+
+############################
+# 4️⃣ PRD Deploy
+############################
+deploy-prd:
   stage: deploy
-  image: alpine/git:latest
+  image: bitnami/kubectl:latest
   needs:
     - build-image
-  before_script:
-    - apk add --no-cache curl bash
-    - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-    - chmod +x kubectl
-    - mv kubectl /usr/local/bin/
-    - git config --global http.sslVerify false
-    - git config --global user.email "ci@gitlab.internal"
-    - git config --global user.name "gitlab-ci"
   script:
-    - 'sed -i "s/newTag:.*/newTag: ${IMAGE_TAG}/" kustomize/overlays/prd/kustomization.yaml'
-    - 'git add kustomize/overlays/prd/kustomization.yaml'
-    - 'git commit -m "deploy(prd): ${IMAGE_TAG} [skip ci]" || echo "no change"'
-    - 'git push https://oauth2:${GITLAB_TOKEN}@gitlab.internal/root/pjt-cicd.git HEAD:main'
-    - 'kubectl apply -k kustomize/overlays/prd'    
+    - kubectl config use-context "$KUBE_CONTEXT_PRD"
+    - kubectl set image deployment/cicd-app cicd-app=$IMAGE_NAME:$IMAGE_TAG -n prd
+    - kubectl rollout status deployment/cicd-app -n prd
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
+
