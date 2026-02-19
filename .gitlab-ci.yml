@@ -5,10 +5,11 @@ stages:
 
 variables:
   IMAGE_NAME: harbor.internal/library/cicd-app
-  IMAGE_TAG: $CI_COMMIT_SHORT_SHA
   DOCKER_CONFIG: /kaniko/.docker
 
-# 1. Java 빌드 단계
+############################
+# 1️⃣ JAR 빌드
+############################
 build-jar:
   stage: build
   image: maven:3.9.6-eclipse-temurin-17
@@ -19,12 +20,18 @@ build-jar:
     paths:
       - app/target/*.jar
   rules:
+<<<<<<< HEAD
     - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"'
       changes:
         - app/**/*
         - app/pom.xml
+=======
+    - if: '$CI_COMMIT_BRANCH =~ /^(dev|main)$/'
+>>>>>>> test
 
-# 2. 이미지 빌드 & 푸시 단계
+############################
+# 2️⃣ Docker 이미지 빌드 & Push
+############################
 build-image:
   stage: image
   image:
@@ -32,6 +39,15 @@ build-image:
   dependencies:
     - build-jar
   script:
+    # 브랜치별 태그 설정
+    - |
+      if [ "$CI_COMMIT_BRANCH" = "dev" ]; then
+        export IMAGE_TAG="dev-$CI_COMMIT_SHORT_SHA"
+      elif [ "$CI_COMMIT_BRANCH" = "main" ]; then
+        export IMAGE_TAG="prod-$CI_COMMIT_SHORT_SHA"
+      fi
+      echo "IMAGE_TAG=$IMAGE_TAG" >> build.env
+
     # Harbor 인증
     - mkdir -p "$DOCKER_CONFIG"
     - |
@@ -55,24 +71,57 @@ build-image:
         --insecure \
         --insecure-pull \
         --skip-push-permission-check
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"'
 
-update-kustomize-dev:
+  artifacts:
+    reports:
+      dotenv: build.env
+
+  rules:
+<<<<<<< HEAD
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"'
+=======
+    - if: '$CI_COMMIT_BRANCH =~ /^(dev|main)$/'
+
+############################
+# 3️⃣ DEV 배포
+############################
+deploy-dev:
   stage: deploy
-  image: alpine/git:latest
+  image: bitnami/kubectl:latest
   needs:
     - build-image
-  before_script:
-    - git config --global http.sslVerify false
-    - git config --global user.email "ci@gitlab.internal"
-    - git config --global user.name "gitlab-ci"
   script:
-    - 'sed -i "s/newTag:.*/newTag: ${IMAGE_TAG}/" kustomize/overlays/dev/kustomization.yaml'
-    - 'git add kustomize/overlays/dev/kustomization.yaml'
-    - 'git commit -m "deploy(dev): ${IMAGE_TAG} [skip ci]" || echo "no change"'
-    - 'git push https://oauth2:${GITLAB_TOKEN}@gitlab.internal/root/pjt-cicd.git HEAD:main'
+    - echo "Deploying to DEV with tag $IMAGE_TAG"
+
+    # dev overlay 태그 수정
+    - sed -i "s/newTag:.*/newTag: ${IMAGE_TAG}/" kustomize/overlays/dev/kustomization.yaml
+
+    # dev namespace 배포
+    - kubectl apply -k kustomize/overlays/dev
+
   rules:
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+>>>>>>> test
+
+############################
+# 4️⃣ PRD 배포
+############################
+deploy-prd:
+  stage: deploy
+  image: bitnami/kubectl:latest
+  needs:
+    - build-image
+  script:
+    - echo "Deploying to PRD with tag $IMAGE_TAG"
+
+    # prd overlay 태그 수정
+    - sed -i "s/newTag:.*/newTag: ${IMAGE_TAG}/" kustomize/overlays/prd/kustomization.yaml
+
+    # prd namespace 배포
+    - kubectl apply -k kustomize/overlays/prd
+
+  rules:
+<<<<<<< HEAD
     - if: '$CI_COMMIT_BRANCH == "dev"'
       
 update-kustomize-prd:
@@ -91,3 +140,7 @@ update-kustomize-prd:
     - 'git push https://oauth2:${GITLAB_TOKEN}@gitlab.internal/root/pjt-cicd.git HEAD:main'
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
+=======
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+>>>>>>> test
