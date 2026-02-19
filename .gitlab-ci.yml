@@ -73,7 +73,7 @@ update-manifest-dev:
     - git config --global user.email "ci@gitlab"
     - git config --global user.name "gitlab-ci"
     - git config --global http.sslVerify false
-    - sed -i "s|newTag:.*|newTag: ${IMAGE_TAG}|g" kustomize/overlays/prod/kustomization.yaml
+    - sed -i "s|newTag:.*|newTag: ${IMAGE_TAG}|g" kustomize/overlays/dev/kustomization.yaml      
     - git add kustomize/overlays/dev/kustomization.yaml
     - git commit -m "dev: update image tag to $IMAGE_TAG"
     - git push https://oauth2:${GITLAB_TOKEN}@gitlab.internal/root/pjt-cicd.git HEAD:dev
@@ -83,7 +83,7 @@ update-manifest-dev:
 #################################
 # 4️⃣ Update PROD overlay
 #################################
-update-manifest-prod:
+update-manifest-prd:
   stage: update-manifest
   image: alpine:latest
   before_script:
@@ -92,9 +92,9 @@ update-manifest-prod:
     - git config --global user.email "ci@gitlab"
     - git config --global user.name "gitlab-ci"
     - git config --global http.sslVerify false
-    - sed -i "s|newTag:.*|newTag: ${IMAGE_TAG}|g" kustomize/overlays/prod/kustomization.yaml
-    - git add kustomize/overlays/prod/kustomization.yaml
-    - git commit -m "prod: update image tag to $IMAGE_TAG"
+    - sed -i "s|newTag:.*|newTag: ${IMAGE_TAG}|g" kustomize/overlays/prd/kustomization.yaml
+    - git add kustomize/overlays/prd/kustomization.yaml
+    - git commit -m "prd: update image tag to $IMAGE_TAG"
     - git push https://oauth2:${GITLAB_TOKEN}@gitlab.internal/root/pjt-cicd.git HEAD:main
   only:
     - main
