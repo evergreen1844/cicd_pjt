@@ -8,25 +8,27 @@ variables:
   IMAGE_TAG: $CI_COMMIT_SHORT_SHA
   DOCKER_CONFIG: /kaniko/.docker
 
-############################
-# 1️⃣ Java Build
-############################
+#################################
+# 1️⃣ Build JAR
+#################################
 build-jar:
   stage: build
   image: maven:3.9.6-eclipse-temurin-17
   script:
     - cd app
     - mvn clean package -DskipTests
+    - ls -l target
   artifacts:
     paths:
-      - app/target/*.jar
+      - app/target/demo-0.0.1.jar
     expire_in: 1 hour
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"'
+  only:
+    - dev
+    - main
 
-############################
-# 2️⃣ Docker Image Build & Push
-############################
+#################################
+# 2️⃣ Build & Push Image
+#################################
 build-image:
   stage: image
   image:
@@ -34,6 +36,9 @@ build-image:
   dependencies:
     - build-jar
   script:
+    - echo "===== JAR 확인 ====="
+    - ls -l app/target
+
     - mkdir -p "$DOCKER_CONFIG"
     - |
       cat > "$DOCKER_CONFIG/config.json" <<EOF
@@ -54,13 +59,15 @@ build-image:
         --destination "$IMAGE_NAME:$IMAGE_TAG" \
         --insecure \
         --insecure-pull \
-        --skip-push-permission-check
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"'
+        --skip-push-permission-check \
+        --no-cache
+  only:
+    - dev
+    - main
 
-############################
-# 3️⃣ DEV Deploy (context 사용 안함)
-############################
+#################################
+# 3️⃣ Deploy (kubectl 유지 버전)
+#################################
 deploy-dev:
   stage: deploy
   image: bitnami/kubectl:latest
@@ -69,12 +76,9 @@ deploy-dev:
   script:
     - kubectl set image deployment/cicd-app cicd-app=$IMAGE_NAME:$IMAGE_TAG -n dev
     - kubectl rollout status deployment/cicd-app -n dev
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "dev"'
+  only:
+    - dev
 
-############################
-# 4️⃣ PRD Deploy (context 사용 안함)
-############################
 deploy-prd:
   stage: deploy
   image: bitnami/kubectl:latest
@@ -83,6 +87,6 @@ deploy-prd:
   script:
     - kubectl set image deployment/cicd-app cicd-app=$IMAGE_NAME:$IMAGE_TAG -n prd
     - kubectl rollout status deployment/cicd-app -n prd
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
+  only:
+    - main
 
